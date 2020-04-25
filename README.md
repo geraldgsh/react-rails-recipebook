@@ -124,3 +124,19 @@ Done in 7.52s
 ```
 
 # Step 4 — Setting Up the Homepage
+
+```
+$ rails g controller Homepage index
+      create  app/controllers/homepage_controller.rb
+       route  get 'homepage/index'
+      invoke  erb
+      create    app/views/homepage
+      create    app/views/homepage/index.html.erb
+      invoke  helper
+      create    app/helpers/homepage_helper.rb
+      invoke  assets
+      invoke    scss
+      create      app/assets/stylesheets/homepage.scss
+```
+
+
