@@ -154,12 +154,233 @@ end
 rails s --binding=127.0.0.1
 ```
 
-##### Delete the contents of the ~/rails_react_recipe/app/views/homepage/index.html.erb
+##### Delete the contents of the ~/rails_react_recipebook/app/views/homepage/index.html.erb
 
-```
+```html
 <h1>Homepage#index</h1>
 <p>Find me in app/views/homepage/index.html.erb</p>
 ```
 
 # Step 5 — Configuring React as Your Rails Frontend
+
+First, rename the `~/rails_react_recipebook/app/javascript/packs/hello_react.jsx` file to `~/rails_react_recipebook/app/javascript/packs/Index.jsx`.
+
+```
+mv ~/rails_react_recipebook/app/javascript/packs/hello_react.jsx ~/rails_react_recipe/app/javascript/packs/Index.jsx
+```
+
+add;
+
+`<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">`
+`<%= javascript_pack_tag 'Index' %>`
+
+below
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RailsReactRecipe</title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <%= javascript_pack_tag 'Index' %>
+  </head>
+
+  <body>
+    <%= yield %>
+  </body>
+</html>
+```
+
+Adding the JavaScript pack to your application’s header makes all your JavaScript code available and executes the code in your Index.jsx file on the page whenever you run the app. Along with the JavaScript pack, you also added a meta viewport tag to control the dimensions and scaling of pages on your application.
+
+
+Create a components directory in the app/javascript directory:
+
+```
+mkdir ~/rails_react_recipebook/app/javascript/components
+```
+
+create a Home.jsx file in the components directory:
+
+```
+$nano ~/rails_react_recipe/app/javascript/components/Home.jsx
+```
+
+Add the following code to the file:
+
+```js
+~/rails_react_recipe/app/javascript/components/Home.jsx
+import React from "react";
+import { Link } from "react-router-dom";
+
+export default () => (
+  <div className="vw-100 vh-100 primary-color d-flex align-items-center justify-content-center">
+    <div className="jumbotron jumbotron-fluid bg-transparent">
+      <div className="container secondary-color">
+        <h1 className="display-4">Food Recipes</h1>
+        <p className="lead">
+          A curated list of recipes for the best homemade meal and delicacies.
+        </p>
+        <hr className="my-4" />
+        <Link
+          to="/recipes"
+          className="btn btn-lg custom-button"
+          role="button"
+        >
+          View Recipes
+        </Link>
+      </div>
+    </div>
+  </div>
+);
+```
+
+In this code, you imported React and also the Link component from React Router. The Link component creates a hyperlink to navigate from one page to another. You then created and exported a functional component containing some Markup language for your homepage, styled with Bootstrap classes.
+
+
+With your Home component in place, you will now set up routing using React Router. Create a routes directory in the app/javascript directory:
+
+```
+$ mkdir ~/rails_react_recipe/app/javascript/routes
+```
+
+The routes directory will contain a few routes with their corresponding components. Whenever any specified route is loaded, it will render its corresponding component to the browser.
+
+In the routes directory, create an Index.jsx file:
+
+```
+ nano ~/rails_react_recipebook/app/javascript/routes/Index.jsx
+```
+
+Add;
+
+```js
+/rails_react_recipe/app/javascript/routes/Index.jsx
+
+import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import Home from "../components/Home";
+
+export default (
+  <Router>
+    <Switch>
+      <Route path="/" exact component={Home} />
+    </Switch>
+  </Router>
+);
+```
+
+In this Index.jsx route file, you imported a couple of modules: the React module that allows us to use React, and the BrowserRouter, Route, and Switch modules from React Router, which together help us navigate from one route to another. Lastly, you imported your Home component, which will be rendered whenever a request matches the root (/) route. Whenever you want to add more pages to your application, all you need to do is declare a route in this file and match it to the component you want to render for that page.
+
+Create an App.jsx file in the app/javascript/components directory:
+
+```
+$ nano ~/rails_react_recipebook/app/javascript/components/App.jsx
+```
+
+```js
+/rails_react_recipe/app/javascript/components/App.jsx
+
+import React from "react";
+import Routes from "../routes/Index";
+
+export default props => <>{Routes}</>;
+```
+
+In the App.jsx file, you imported React and the route files you just created. You then exported a component that renders the routes within fragments. This component will be rendered at the entry point of the aplication, thereby making the routes available whenever the application is loaded.
+
+Now that you have your App.jsx set up, it’s time to render it in your entry file. Open the entry Index.jsx file:
+
+```
+$ nano ~/rails_react_recipe/app/javascript/packs/Index.jsx
+```
+
+Replace the code there with the following code:
+
+```js
+
+import React from "react";
+import { render } from "react-dom";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import $ from 'jquery';
+import Popper from 'popper.js';
+import 'bootstrap/dist/js/bootstrap.bundle.min';
+import App from "../components/App";
+
+document.addEventListener("DOMContentLoaded", () => {
+  render(
+    <App />,
+    document.body.appendChild(document.createElement("div"))
+  );
+});
+```
+
+In this code snippet, you imported React, the render method from ReactDOM, Bootstrap, jQuery, Popper.js, and your App component. Using ReactDOM’s render method, you rendered your App component in a div element, which was appended to the body of the page. Whenever the application is loaded, React will render the content of the App component inside the div element on the page.
+
+
+Open up your `application.css` in your `~/rails_react_recipe/app/assets/stylesheets` directory:
+
+```
+$ nano ~/rails_react_recipebook/app/assets/stylesheets/application.css
+```
+
+```css
+/app/assets/stylesheets/application.css
+
+.bg_primary-color {
+  background-color: #FFFFFF;
+}
+.primary-color {
+  background-color: #FFFFFF;
+}
+.bg_secondary-color {
+  background-color: #293241;
+}
+.secondary-color {
+  color: #293241;
+}
+.custom-button.btn {
+  background-color: #293241;
+  color: #FFF;
+  border: none;
+}
+.custom-button.btn:hover {
+  color: #FFF !important;
+  border: none;
+}
+.hero {
+  width: 100vw;
+  height: 50vh;
+}
+.hero img {
+  object-fit: cover;
+  object-position: top;
+  height: 100%;
+  width: 100%;
+}
+.overlay {
+  height: 100%;
+  width: 100%;
+  opacity: 0.4;
+}
+```
+
+# Step 6 — Creating the Recipe Controller and Model
+
+Create a Recipe model and controller. The recipe model will represent the database table that will hold information about the user’s recipes while the controller will receive and handle requests to create, read, update, or delete recipes. When a user requests a recipe, the recipe controller receives this request and passes it to the recipe model, which retrieves the requested data from the database. The model then returns the recipe data as a response to the controller. Finally, this information is displayed in the browser.
+
+Create a Recipe model by using the generate model subcommand provided by Rails and by specifying the name of the model along with its columns and data types.
+
+```
+$ rails generate model Recipe name:string ingredients:text instruction:text image:string
+
+      invoke  active_record
+      create    db/migrate/20200425194512_create_recipes.rb
+      create    app/models/recipe.rb
+```
 
