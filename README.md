@@ -457,3 +457,154 @@ You also passed some flags to make the controller more lightweight, including:
 * `--skip-template-engine`, which instructs Rails to skip generating Rails view files, since React is handling your front-end needs.
 * `--no-helper`, which instructs Rails to skip generating a helper file for your controller.
 
+Running the command also updated your routes file with a route for each action in the Recipes controller. To use these routes, make changes to your config/routes.rb file.
+
+Open up the routes file in your text editor:
+
+```
+$ nano ~/rails_react_recipe/config/routes.rb
+```
+
+``` ruby
+Rails.application.routes.draw do
+  namespace :api do
+    namespace :v1 do
+      get 'recipes/index'
+      post 'recipes/create'
+      get '/show/:id', to: 'recipes#show'
+      delete '/destroy/:id', to: 'recipes#destroy'
+    end
+  end
+  root 'homepage#index'
+  get '/*path' => 'homepage#index'
+  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+end
+```
+
+To see a list of routes available in your application, run the following command in your Terminal window:
+
+```
+$ rails routes
+```
+
+Running this command displays a list of URI patterns, verbs, and matching controllers or actions for your project.
+
+Next, add the logic for getting all recipes at once. Rails uses the ActiveRecord library to handle database-related tasks like this. ActiveRecord connects classes to relational database tables and provides a rich API for working with them.
+
+To get all recipes, you’ll use ActiveRecord to query the recipes table and fetch all the recipes that exist in the database.
+
+Open the recipes_controller.rb file with the following command:
+
+```ruby
+$ nano ~/rails_react_recipebook/app/controllers/api/v1/recipes_controller.rb
+
+
+class Api::V1::RecipesController < ApplicationController
+  def index
+    recipe = Recipe.all.order(created_at: :desc)
+    render json: recipe
+  end
+
+  def create
+  end
+
+  def show
+  end
+
+  def destroy
+  end
+end
+```
+
+In your index action, using the all method provided by ActiveRecord, you get all the recipes in your database. Using the order method, you order them in descending order by their created date. This way, you have the newest recipes first. Lastly, you send your list of recipes as a JSON response with render.
+
+Next, add the logic for creating new recipes. As with fetching all recipes, you’ll rely on ActiveRecord to validate and save the provided recipe details. Update your recipe controller with the following highlighted lines of code:
+
+```ruby
+app/controllers/api/v1/recipes_controller.rb
+
+class Api::V1::RecipesController < ApplicationController
+  def index
+    recipe = Recipe.all.order(created_at: :desc)
+    render json: recipe
+  end
+
+  def creater
+    recipe = Recipe.create!(recipe_params)
+    if recipe
+      render json: recipe
+    else
+      render json: recipe.errors
+  end
+
+  def show
+  end
+
+  def destroy
+  end
+  
+  private
+
+  def recipe_params
+    params.permit(:name, :image, :ingredients, :instruction)
+  end
+end
+
+```
+
+In the create action, you use ActiveRecord’s create method to create a new recipe. The create method has the ability to assign all controller parameters provided into the model at once. This makes it easy to create records, but also opens the possibility of malicious use. This can be prevented by using a feature provided by Rails known as strong parameters. This way, parameters can’t be assigned unless they’ve been whitelisted. In your code, you passed a recipe_params parameter to the create method. The recipe_params is a private method where you whitelisted your controller parameters to prevent wrong or malicious content from getting into your database. In this case, you are permitting a name, image, ingredients, and instruction parameter for valid use of the create method.
+
+Your recipe controller can now read and create recipes. All that’s left is the logic for reading and deleting a single recipe. Update your recipes controller with the following code:
+
+
+```ruby
+app/controllers/api/v1/recipes_controller.rb
+
+class Api::V1::RecipesController < ApplicationController
+  def index
+    recipe = Recipe.all.order(created_at: :desc)
+    render json: recipe
+  end
+
+  def create
+    recipe = Recipe.create!(recipe_params)
+    if recipe
+      render json: recipe
+    else
+      render json: recipe.errors
+    end
+  end
+
+  def show
+    if recipe
+      render json: recipe
+    else
+      render json: recipe.errors
+    end
+  end
+
+  def destroy
+    recipe&.destroy
+    render json: { message: 'Recipe deleted!' }
+  end
+
+  private
+
+  def recipe_params
+    params.permit(:name, :image, :ingredients, :instruction)
+  end
+
+  def recipe
+    @recipe ||= Recipe.find(params[:id])
+  end
+end
+```
+
+In the new lines of code, you created a private recipe method. The recipe method uses ActiveRecord’s find method to find a recipe whose idmatches the id provided in the params and assigns it to an instance variable @recipe. In the show action, you checked if a recipe is returned by the recipe method and sent it as a JSON response, or sent an error if it was not.
+
+In the destroy action, you did something similar using Ruby’s safe navigation operator &., which avoids nil errors when calling a method. This let’s you delete a recipe only if it exists, then send a message as a response.
+
+Now that you have finished making these changes to recipes_controller.rb, save the file and exit your text editor.
+
+In this step, you created a model and controller for your recipes. You’ve written all the logic needed to work with recipes on the backend. In the next section, you’ll create components to view your recipes.
+
