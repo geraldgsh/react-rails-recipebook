@@ -1068,3 +1068,294 @@ export default (
 In this route file, you imported your Recipe component and added a route for it. Its route has an :id param that will be replaced by the id of the recipe you want to view.
 
 Use the rails s command to start your server again, then visit http://localhost:3000 in your browser. Click the View Recipes button to navigate to the recipes page. On the recipes page, view any recipe by clicking its View Recipe button. 
+
+# Step 8 — Creating Recipes
+
+The next step to having a usable food recipe application is the ability to create new recipes. In this step, you will create a component for creating recipes. This component will contain a form for collecting the required recipe details from the user and will make a request to the create action in the Recipe controller to save the recipe data.
+
+Create a NewRecipe.jsx file in the app/javascript/components directory:
+
+```
+$ nano app/javascript/components/NewRecipe.jsx
+```
+
+In the new file, import the React and Link modules.
+
+Create a NewRecipe class that extends React.Component class. 
+
+```js
+app/javascript/components/NewRecipe.jsx
+
+import React from "react";
+import { Link } from "react-router-dom";
+
+class NewRecipe extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: "",
+      ingredients: "",
+      instruction: ""
+    };
+
+    this.onChange = this.onChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.stripHtmlEntities = this.stripHtmlEntities.bind(this);
+  }
+}
+
+export default NewRecipe;
+```
+
+In the NewRecipe component’s constructor, you initialized your state object with empty name, ingredients, and instruction fields. These are the fields you need to create a valid recipe. You also have three methods; onChange, onSubmit, and stripHtmlEntities, which you bound to this. These methods will handle updating the state, form submissions, and converting special characters (like <) into their escaped/encoded values (like &lt;), respectively.
+
+Next, create the stripHtmlEntities method itself by adding the highlighted lines to the NewRecipe component:
+
+```js
+/app/javascript/components/NewRecipe.jsx
+
+class NewRecipe extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: "",
+      ingredients: "",
+      instruction: ""
+    };
+
+    this.onChange = this.onChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.stripHtmlEntities = this.stripHtmlEntities.bind(this);
+  }
+
+  stripHtmlEntities(str) {
+    return String(str)
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+}
+
+export default NewRecipe;
+```
+
+In the stripHtmlEntities method, you’re replacing the < and > characters with their escaped value. This way you’re not storing raw HTML in your database.
+
+Next add the onChange and onSubmit methods to the NewRecipe component to handle editing and submission of the form:
+
+```js
+app/javascript/components/NewRecipe.jsx
+
+class NewRecipe extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: "",
+      ingredients: "",
+      instruction: ""
+    };
+
+    this.onChange = this.onChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.stripHtmlEntities = this.stripHtmlEntities.bind(this);
+  }
+
+  stripHtmlEntities(str) {
+    return String(str)
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  onChange(event) {
+    this.setState({ [event.target.name]: event.target.value });
+  }
+
+  onSubmit(event) {
+    event.preventDefault();
+    const url = "/api/v1/recipes/create";
+    const { name, ingredients, instruction } = this.state;
+
+    if (name.length == 0 || ingredients.length == 0 || instruction.length == 0)
+      return;
+
+    const body = {
+      name,
+      ingredients,
+      instruction: instruction.replace(/\n/g, "<br> <br>")
+    };
+
+    const token = document.querySelector('meta[name="csrf-token"]').content;
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "X-CSRF-Token": token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error("Network response was not ok.");
+      })
+      .then(response => this.props.history.push(`/recipe/${response.id}`))
+      .catch(error => console.log(error.message));
+  }
+
+}
+
+export default NewRecipe;
+```
+
+In the onChange method, you used the ES6 computed property names to set the value of every user input to its corresponding key in your state. In the onSubmit method, you checked that none of the required inputs are empty. You then build an object that contains the parameters required by the recipe controller to create a new recipe. Using regular expression, you replace every new line character in the instruction with a break tag, so you can retain the text format entered by the user.
+
+To protect against Cross-Site Request Forgery (CSRF) attacks, Rails attaches a CSRF security token to the HTML document. This token is required whenever a non-GET request is made. With the token constant in the preceding code, your application verifies the token on the server and throws an exception if the security token doesn’t match what is expected. In the onSubmit method, the application retrieves the CSRF token embedded in your HTML document by Rails and makes a HTTP request with a JSON string. If the recipe is successfully created, the application redirects the user to the recipe page where they can view their newly created recipe.
+
+Lastly, add a render method that renders a form for the user to enter the details for the recipe the user wishes to create:
+
+```js
+/app/javascript/components/NewRecipe.jsx
+
+class NewRecipe extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: "",
+      ingredients: "",
+      instruction: ""
+    };
+
+    this.onChange = this.onChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.stripHtmlEntities = this.stripHtmlEntities.bind(this);
+  }
+
+  stripHtmlEntities(str) {
+    return String(str)
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  onChange(event) {
+    this.setState({ [event.target.name]: event.target.value });
+  }
+
+  onSubmit(event) {
+    event.preventDefault();
+    const url = "/api/v1/recipes/create";
+    const { name, ingredients, instruction } = this.state;
+
+    if (name.length == 0 || ingredients.length == 0 || instruction.length == 0)
+      return;
+
+    const body = {
+      name,
+      ingredients,
+      instruction: instruction.replace(/\n/g, "<br> <br>")
+    };
+
+    const token = document.querySelector('meta[name="csrf-token"]').content;
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "X-CSRF-Token": token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error("Network response was not ok.");
+      })
+      .then(response => this.props.history.push(`/recipe/${response.id}`))
+      .catch(error => console.log(error.message));
+  }
+
+  render() {
+    return (
+      <div className="container mt-5">
+        <div className="row">
+          <div className="col-sm-12 col-lg-6 offset-lg-3">
+            <h1 className="font-weight-normal mb-5">
+              Add a new recipe to our awesome recipe collection.
+            </h1>
+            <form onSubmit={this.onSubmit}>
+              <div className="form-group">
+                <label htmlFor="recipeName">Recipe name</label>
+                <input
+                  type="text"
+                  name="name"
+                  id="recipeName"
+                  className="form-control"
+                  required
+                  onChange={this.onChange}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="recipeIngredients">Ingredients</label>
+                <input
+                  type="text"
+                  name="ingredients"
+                  id="recipeIngredients"
+                  className="form-control"
+                  required
+                  onChange={this.onChange}
+                />
+                <small id="ingredientsHelp" className="form-text text-muted">
+                  Separate each ingredient with a comma.
+                </small>
+              </div>
+              <label htmlFor="instruction">Preparation Instructions</label>
+              <textarea
+                className="form-control"
+                id="instruction"
+                name="instruction"
+                rows="5"
+                required
+                onChange={this.onChange}
+              />
+              <button type="submit" className="btn custom-button mt-3">
+                Create Recipe
+              </button>
+              <Link to="/recipes" className="btn btn-link mt-3">
+                Back to recipes
+              </Link>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+}
+
+export default NewRecipe;
+```
+
+In the render method, you have a form that contains three input fields; one for the recipeName, recipeIngredients, and instruction. Each input field has an onChange event handler that calls the onChange method. Also, there’s an onSubmit event handler on the submit button that calls the onSubmit method which then submits the form data.
+
+```js
+app/javascript/routes/Index.jsx
+
+import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import Home from "../components/Home";
+import Recipes from "../components/Recipes";
+import Recipe from "../components/Recipe";
+import NewRecipe from "../components/NewRecipe";
+
+export default (
+  <Router>
+    <Switch>
+      <Route path="/" exact component={Home} />
+      <Route path="/recipes" exact component={Recipes} />
+      <Route path="/recipe/:id" exact component={Recipe} />
+      <Route path="/recipe" exact component={NewRecipe} />
+    </Switch>
+  </Router>
+);
+```
+
