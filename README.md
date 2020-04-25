@@ -384,3 +384,76 @@ $ rails generate model Recipe name:string ingredients:text instruction:text imag
       create    app/models/recipe.rb
 ```
 
+The preceding command instructs Rails to create a Recipe model together with a name column of type string, an ingredients and instruction column of type text, and an image column of type string. This tutorial has named the model Recipe, because by convention models in Rails use a singular name while their corresponding database tables use a plural name.
+
+Running the generate model command creates two files:
+
+A recipe.rb file that holds all the model related logic.
+A 20200426161357_create_recipes.rb file (the number at the beginning of the file may differ depending on the date when you run the command). This is a migration file that contains the instruction for creating the database structure.
+
+. Open your recipe model located at `app/models/recipe.rb`:
+
+```ruby
+class Recipe < ApplicationRecord
+  validates :name, presence: true
+  validates :ingredients, presence: true
+  validates :instruction, presence: true
+end
+```
+
+To make sure that the migration works with the database you set up, it is necessary to make changes to the 20200426161357_create_recipes.rb file.
+
+```ruby
+
+class CreateRecipes < ActiveRecord::Migration[6.0]
+  def change
+    create_table :recipes do |t|
+      t.string :name, null: false
+      t.text :ingredients, null: false
+      t.text :instruction, null: false
+      t.string :image, default: 'https://raw.githubusercontent.com/do-community/react_rails_recipe/master/app/assets/images/Sammy_Meal.jpg'
+
+      t.timestamps
+    end
+  end
+end
+```
+
+Rub migration and actually create your table. In Terminal window, run the following command:
+
+```
+$ rails db:migrate
+
+== 20200425194512 CreateRecipes: migrating ====================================
+-- create_table(:recipes)
+   -> 0.1280s
+== 20200425194512 CreateRecipes: migrated (0.1287s) ===========================
+```
+
+Create recipes controller and add the logic for creating, reading, and deleting recipes. In Terminal window, run the following command:
+
+```
+$ rails generate controller api/v1/Recipes index create show destroy -j=false -y=false --skip-template-engine --no-helper
+Running via Spring preloader in process 4333
+      create  app/controllers/api/v1/recipes_controller.rb
+       route  namespace :api do
+  namespace :v1 do
+    get 'recipes/index'
+    get 'recipes/create'
+    get 'recipes/show'
+    get 'recipes/destroy'
+  end
+end
+      invoke  assets
+      invoke    scss
+```
+
+In this command, you created a Recipes controller in an api/v1 directory with an index, create, show, and destroy action. The index action will handle fetching all your recipes, the create action will be responsible for creating new recipes, the show action will fetch a single recipe, and the destroy action will hold the logic for deleting a recipe.
+
+You also passed some flags to make the controller more lightweight, including:
+
+* `-j=false` which instructs Rails to skip generating associated JavaScript files.
+* `-y=false` which instructs Rails to skip generating associated stylesheet files.
+* `--skip-template-engine`, which instructs Rails to skip generating Rails view files, since React is handling your front-end needs.
+* `--no-helper`, which instructs Rails to skip generating a helper file for your controller.
+
