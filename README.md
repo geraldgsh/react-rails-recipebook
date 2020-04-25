@@ -608,3 +608,20 @@ Now that you have finished making these changes to recipes_controller.rb, save t
 
 In this step, you created a model and controller for your recipes. You’ve written all the logic needed to work with recipes on the backend. In the next section, you’ll create components to view your recipes.
 
+# Step 7 — Viewing Recipes
+
+Create components for viewing recipes. First create a page where you can view all existing recipes, and then another to view individual recipes.
+
+Open up the seed file seeds.rb to edit:
+
+```ruby
+/db/seeds.rb
+
+9.times do |i|
+  Recipe.create(
+    name: "Recipe #{i + 1}",
+    ingredients: '227g tub clotted cream, 25g butter, 1 tsp cornflour,100g parmesan, grated nutmeg, 250g fresh fettuccine or tagliatelle, snipped chives or chopped parsley to serve (optional)',
+    instruction: 'In a medium saucepan, stir the clotted cream, butter, and cornflour over a low-ish heat and bring to a low simmer. Turn off the heat and keep warm.'
+  )
+end
+```
