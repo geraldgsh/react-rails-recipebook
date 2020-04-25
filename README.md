@@ -814,3 +814,257 @@ Verify that code is working correctly;
 ```
 rails s --binding=127.0.0.1
 ```
+
+Now that you can view all the recipes that exist in your application, it’s time to create a second component to view individual recipes. Create a Recipe.jsx file in the app/javascript/components directory:
+
+Import the React and Link modules
+
+Next create a Recipe class that extends React.Component class.
+
+
+```js
+app/javascript/components/Recipe.jsx
+
+import React from "react";
+import { Link } from "react-router-dom";
+
+class Recipe extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { recipe: { ingredients: "" } };
+
+    this.addHtmlEntities = this.addHtmlEntities.bind(this);
+  }
+}
+
+export default Recipe;
+```
+
+Like with your Recipes component, in the constructor, you initialized a state object that holds the state of a recipe. You also bound an addHtmlEntities method to this so it can be accessible within the component. The addHtmlEntities method will be used to replace character entities with HTML entities in the component.
+
+In order to find a particular recipe, your application needs the id of the recipe. This means your Recipe component expects an id param. You can access this via the props passed into the component.
+
+Next, add a componentDidMount method where you will access the id param from the match key of the props object. Once you get the id, you will then make an HTTP request to fetch the recipe. Add the following highlighted lines to your file:
+
+```js
+app/javascript/components/Recipe.jsx
+
+import React from "react";
+import { Link } from "react-router-dom";
+
+class Recipe extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { recipe: { ingredients: "" } };
+
+    this.addHtmlEntities = this.addHtmlEntities.bind(this);
+  }
+
+  componentDidMount() {
+    const {
+      match: {
+        params: { id }
+      }
+    } = this.props;
+
+    const url = `/api/v1/show/${id}`;
+
+    fetch(url)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error("Network response was not ok.");
+      })
+      .then(response => this.setState({ recipe: response }))
+      .catch(() => this.props.history.push("/recipes"));
+  }
+
+}
+
+export default Recipe;
+```
+
+In the componentDidMount method, using object destructuring, you get the id param from the props object, then using the Fetch API, you make a HTTP request to fetch the recipe that owns the id and save it to the component state using the setState method. If the recipe does not exist, the app redirects the user to the recipes page.
+
+Now add the addHtmlEntities method, which takes a string and replaces all escaped opening and closing brackets with their HTML entities. This will help us convert whatever escaped character was saved in your recipe instruction:
+
+```js
+app/javascript/components/Recipe.jsx
+
+import React from "react";
+import { Link } from "react-router-dom";
+
+class Recipe extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { recipe: { ingredients: "" } };
+
+    this.addHtmlEntities = this.addHtmlEntities.bind(this);
+  }
+
+  componentDidMount() {
+    const {
+      match: {
+        params: { id }
+      }
+    } = this.props;
+
+    const url = `/api/v1/show/${id}`;
+
+    fetch(url)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error("Network response was not ok.");
+      })
+      .then(response => this.setState({ recipe: response }))
+      .catch(() => this.props.history.push("/recipes"));
+  }
+
+  addHtmlEntities(str) {
+    return String(str)
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">");
+  }
+}
+
+export default Recipe;
+```
+
+Finally, add a render method that gets the recipe from the state and renders it on the page. To do this, add the following highlighted lines:
+
+```js
+app/javascript/components/Recipe.jsx
+
+import React from "react";
+import { Link } from "react-router-dom";
+
+class Recipe extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { recipe: { ingredients: "" } };
+
+    this.addHtmlEntities = this.addHtmlEntities.bind(this);
+  }
+
+  componentDidMount() {
+    const {
+      match: {
+        params: { id }
+      }
+    } = this.props;
+
+    const url = `/api/v1/show/${id}`;
+
+    fetch(url)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error("Network response was not ok.");
+      })
+      .then(response => this.setState({ recipe: response }))
+      .catch(() => this.props.history.push("/recipes"));
+  }
+
+  addHtmlEntities(str) {
+    return String(str)
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">");
+  }
+
+  render() {
+    const { recipe } = this.state;
+    let ingredientList = "No ingredients available";
+
+    if (recipe.ingredients.length > 0) {
+      ingredientList = recipe.ingredients
+        .split(",")
+        .map((ingredient, index) => (
+          <li key={index} className="list-group-item">
+            {ingredient}
+          </li>
+        ));
+    }
+    const recipeInstruction = this.addHtmlEntities(recipe.instruction);
+
+    return (
+      <div className="">
+        <div className="hero position-relative d-flex align-items-center justify-content-center">
+          <img
+            src={recipe.image}
+            alt={`${recipe.name} image`}
+            className="img-fluid position-absolute"
+          />
+          <div className="overlay bg-dark position-absolute" />
+          <h1 className="display-4 position-relative text-white">
+            {recipe.name}
+          </h1>
+        </div>
+        <div className="container py-5">
+          <div className="row">
+            <div className="col-sm-12 col-lg-3">
+              <ul className="list-group">
+                <h5 className="mb-2">Ingredients</h5>
+                {ingredientList}
+              </ul>
+            </div>
+            <div className="col-sm-12 col-lg-7">
+              <h5 className="mb-2">Preparation Instructions</h5>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `${recipeInstruction}`
+                }}
+              />
+            </div>
+            <div className="col-sm-12 col-lg-2">
+              <button type="button" className="btn btn-danger">
+                Delete Recipe
+              </button>
+            </div>
+          </div>
+          <Link to="/recipes" className="btn btn-link">
+            Back to recipes
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+}
+
+export default Recipe;
+```
+
+In this render method, you split your comma separated ingredients into an array and mapped over it, creating a list of ingredients. If there are no ingredients, the app displays a message that says No ingredients available. It also displays the recipe image as a hero image, adds a delete recipe button next to the recipe instruction, and adds a button that links back to the recipes page.
+
+Save and exit the file.
+
+To view the Recipe component on a page, add it to your routes file. Open your route file to edit:
+
+```js
+app/javascript/routes/Index.jsx
+
+import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import Home from "../components/Home";
+import Recipes from "../components/Recipes";
+import Recipe from "../components/Recipe";
+
+export default (
+  <Router>
+    <Switch>
+      <Route path="/" exact component={Home} />
+      <Route path="/recipes" exact component={Recipes} />
+      <Route path="/recipe/:id" exact component={Recipe} />
+    </Switch>
+  </Router>
+);
+
+```
+
+In this route file, you imported your Recipe component and added a route for it. Its route has an :id param that will be replaced by the id of the recipe you want to view.
+
+Use the rails s command to start your server again, then visit http://localhost:3000 in your browser. Click the View Recipes button to navigate to the recipes page. On the recipes page, view any recipe by clicking its View Recipe button. 
