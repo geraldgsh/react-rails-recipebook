@@ -625,3 +625,75 @@ Open up the seed file seeds.rb to edit:
   )
 end
 ```
+
+Seed the database with this data, run the following command in Terminal window:
+
+```
+rails db:seed
+```
+
+Running this command adds nine recipes to your database. Now you can fetch them and render them on the frontend.
+
+The component to view all recipes will make a HTTP request to the index action in the RecipesController to get a list of all recipes. These recipes will then be displayed in cards on the page.
+
+Create a Recipes.jsx file in the app/javascript/components directory:
+
+Import the React and Link modules
+
+```ruby
+import React from "react";
+import { Link } from "react-router-dom";
+```
+
+Create a Recipes class that extends the React.Component class. Add the following highlighted code to create a React component that extends React.Component:
+
+```js
+import React from "react";
+import { Link } from "react-router-dom";
+
+class Recipes extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      recipes: []
+    };
+  }
+
+}
+export default Recipes;
+```
+
+Inside the constructor, we are initializing a state object that holds the state of your recipes, which on initialization is an empty array ([]).
+
+Next, add a componentDidMount method in the Recipe class. The componentDidMount method is a React lifecycle method that is called immediately after a component is mounted. In this lifecycle method, you will make a call to fetch all your recipes. To do this, add the following lines:
+
+```js
+/app/javascript/components/Recipes.jsx
+
+import React from "react";
+import { Link } from "react-router-dom";
+
+class Recipes extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      recipes: []
+    };
+  }
+
+  componentDidMount() {
+      const url = "/api/v1/recipes/index";
+      fetch(url)
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error("Network response was not ok.");
+        })
+        .then(response => this.setState({ recipes: response }))
+        .catch(() => this.props.history.push("/"));
+  }
+
+}
+export default Recipes;
+```
