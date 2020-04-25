@@ -1,26 +1,33 @@
-import React from "react";
-import { Link } from "react-router-dom";
+/* eslint-disable react/jsx-one-expression-per-line */
+/* eslint-disable jsx-a11y/img-redundant-alt */
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable react/prop-types */
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable import/no-unresolved */
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 class Recipes extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      recipes: []
+      recipes: [],
     };
   }
 
   componentDidMount() {
-    const url = "/api/v1/recipes/index";
+    const url = '/api/v1/recipes/index';
     fetch(url)
-      .then(response => {
+      .then((response) => {
         if (response.ok) {
           return response.json();
         }
-        throw new Error("Network response was not ok.");
+        throw new Error('Network response was not ok.');
       })
-      .then(response => this.setState({ recipes: response }))
-      .catch(() => this.props.history.push("/"));
+      .then((response) => this.setState({ recipes: response }))
+      .catch(() => this.props.history.push('/'));
   }
+
   render() {
     const { recipes } = this.state;
     const allRecipes = recipes.map((recipe, index) => (
@@ -79,4 +86,5 @@ class Recipes extends React.Component {
     );
   }
 }
+
 export default Recipes;

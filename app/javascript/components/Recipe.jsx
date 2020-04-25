@@ -1,47 +1,81 @@
-import React from "react";
-import { Link } from "react-router-dom";
+/* eslint-disable react/no-danger */
+/* eslint-disable jsx-a11y/img-redundant-alt */
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable no-console */
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable class-methods-use-this */
+/* eslint-disable react/prop-types */
+/* eslint-disable import/no-unresolved */
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 class Recipe extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { recipe: { ingredients: "" } };
-
+    this.state = { recipe: { ingredients: '' } };
+    this.deleteRecipe = this.deleteRecipe.bind(this);
     this.addHtmlEntities = this.addHtmlEntities.bind(this);
   }
 
   componentDidMount() {
     const {
       match: {
-        params: { id }
-      }
+        params: { id },
+      },
     } = this.props;
 
     const url = `/api/v1/show/${id}`;
 
     fetch(url)
-      .then(response => {
+      .then((response) => {
         if (response.ok) {
           return response.json();
         }
-        throw new Error("Network response was not ok.");
+        throw new Error('Network response was not ok.');
       })
-      .then(response => this.setState({ recipe: response }))
-      .catch(() => this.props.history.push("/recipes"));
+      .then((response) => this.setState({ recipe: response }))
+      .catch(() => this.props.history.push('/recipes'));
   }
 
   addHtmlEntities(str) {
     return String(str)
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">");
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>');
+  }
+
+  deleteRecipe() {
+    const {
+      match: {
+        params: { id },
+      },
+    } = this.props;
+    const url = `/api/v1/destroy/${id}`;
+    const token = document.querySelector('meta[name="csrf-token"]').content;
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-Token': token,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Network response was not ok.');
+      })
+      .then(() => this.props.history.push('/recipes'))
+      .catch((error) => console.log(error.message));
   }
 
   render() {
     const { recipe } = this.state;
-    let ingredientList = "No ingredients available";
+    let ingredientList = 'No ingredients available';
 
     if (recipe.ingredients.length > 0) {
       ingredientList = recipe.ingredients
-        .split(",")
+        .split(',')
         .map((ingredient, index) => (
           <li key={index} className="list-group-item">
             {ingredient}
@@ -75,12 +109,12 @@ class Recipe extends React.Component {
               <h5 className="mb-2">Preparation Instructions</h5>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: `${recipeInstruction}`
+                  __html: `${recipeInstruction}`,
                 }}
               />
             </div>
             <div className="col-sm-12 col-lg-2">
-              <button type="button" className="btn btn-danger">
+              <button type="button" className="btn btn-danger" onClick={this.deleteRecipe}>
                 Delete Recipe
               </button>
             </div>
@@ -92,7 +126,6 @@ class Recipe extends React.Component {
       </div>
     );
   }
-
 }
 
 export default Recipe;
