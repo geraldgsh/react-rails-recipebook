@@ -139,4 +139,27 @@ $ rails g controller Homepage index
       create      app/assets/stylesheets/homepage.scss
 ```
 
+##### Edit route
+```
+config/routes.rb
+
+Rails.application.routes.draw do
+  root 'homepage#index'
+  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+end
+```
+
+##### Run server
+```
+rails s --binding=127.0.0.1
+```
+
+##### Delete the contents of the ~/rails_react_recipe/app/views/homepage/index.html.erb
+
+```
+<h1>Homepage#index</h1>
+<p>Find me in app/views/homepage/index.html.erb</p>
+```
+
+# Step 5 — Configuring React as Your Rails Frontend
 
