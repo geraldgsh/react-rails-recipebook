@@ -3,7 +3,7 @@ React
 
 ### Snapshot
 
-![]()
+![](https://github.com/geraldgsh/react-rails-recipebook/blob/development/app/assets/images/screenshot.JPG?raw=true)
 
 ### Introduction.
 
