@@ -1,142 +1,246 @@
-# Creating a New Rails Application
+# Tutorial - Recipebook
+React
 
-```
-$ rails new rails_react_recipebook -T -d postgresql -T --webpack=react --skip-coffee
-      create
-      create  README.md
-      create  Rakefile
-.
-.
+### Snapshot
 
-├─ react@16.13.1
-└─ scheduler@0.19.1
-Done in 5.46s.
-```
+![]()
 
-# Step 2 — Setting Up the Database
+### Introduction.
 
-### DB Config file setup
+In this tutorial, you will create a Ruby on Rails application that stores your favorite recipes then displays them with a React frontend. When you are finished, you will be able to create, view, and delete recipes using a React interface styled with Bootstrap
 
-```
-# config/database.yml
+### Tools
 
-default: &default
-  adapter: postgresql
-  encoding: unicode
-  # For details on connection pooling, see Rails configuration guide
-  # https://guides.rubyonrails.org/configuring.html#database-pooling
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  timeout: 5000
+* Node.js
+* Rails
+* Ruby
+* React
+* React-DOM
+* React-Create-App
+* npm
+* CSS
+* ES6
+* Webpack
+* prop-types
+* Bootstrap
+* JQuery
 
-development:
-  adapter: postgresql
-  encoding: unicode
-  database: recipebook_development
-  username: postgres
-  password: postgres
-  host: 127.0.0.1
+### Linter Setup
 
-test:
-  adapter: postgresql
-  encoding: unicode
-  database: recipebook_test
-  username: postgres
-  password: postgres
-  host: 127.0.0.1
+Clone file [content](https://github.com/microverseinc/linters-config/tree/master/javascript) into root directory (except for readme.md)
 
-production:
-  adapter: postgresql
-  encoding: unicode
-  database: recipebook_production
-  username: postgres
-  password: postgres
-  host: 127.0.0.1
+Install ESLint on Linux environment using the following commands
+
+Install Node Version Manager to update NodeJS + NPM.
+
+```sh
+$curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
+
+$export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+
+$[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 ```
 
-### DB setup with docker
+Run the following command to verify installation;
 
-```
-docker run -d --name recipebook -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres
-89ea2315f3584d678726c44d6ad7b6f4db8a2c93e5e3863af99f84f6ec26fe11
-```
-
-###  Rails DB setup
-
-```
-$ rails db:create
-Created database 'recipebook_development'
-Created database 'recipebook_test'
-````
-
-### Start application
-
-Now that the application is connected to a database, start the application by running the following command in you Terminal window:
-
-```
-$ rails s --binding=127.0.0.1
-
-=> Booting Puma
-=> Rails 6.0.2.2 application starting in development
-=> Run `rails server --help` for more startup options
-Puma starting in single mode...
-* Version 4.3.3 (ruby 2.6.5-p114), codename: Mysterious Traveller
-* Min threads: 5, max threads: 5
-* Environment: development
-* Listening on tcp://127.0.0.1:3000
-Use Ctrl-C to stop
+```sh
+$ command -v 
+nvm
 ```
 
-# Step 3 — Installing Frontend Dependencies
+To download, compile, and install the latest release of node, do this.
 
-In this step, you will install the JavaScript dependencies needed on the frontend of your food recipe application. They include:
-
-* `React Router`, for handling navigation in a React application.
-* `Bootstrap`, for styling your front-end components.
-* `jQuery` and `Popper`, for working with Bootstrap.
-
-```
-$ yarn add react-router-dom bootstrap jquery popper.js
-yarn add v1.21.1
-[1/4] Resolving packages...
-[2/4] Fetching packages...
-[3/4] Linking dependencies...
-[4/4] Building fresh packages...
-success Saved lockfile.
-success Saved 11 new dependencies.
-info Direct dependencies
-├─ bootstrap@4.4.1
-├─ jquery@3.5.0
-├─ popper.js@1.16.1
-└─ react-router-dom@5.1.2
-info All dependencies
-├─ bootstrap@4.4.1
-├─ gud@1.0.0
-├─ hoist-non-react-statics@3.3.2
-├─ jquery@3.5.0
-├─ mini-create-react-context@0.3.2
-├─ popper.js@1.16.1
-├─ react-router-dom@5.1.2
-├─ react-router@5.1.2
-├─ resolve-pathname@3.0.0
-├─ tiny-warning@1.0.3
-└─ value-equal@1.0.1
-Done in 7.52s
+```sh
+nvm install node
 ```
 
-# Step 4 — Setting Up the Homepage
+Source [here](https://github.com/nvm-sh/nvm#installing-and-updating)
 
+Please do the following **steps in this order**:
+
+#### Set-up Stickler (Github app) - it will show that your app is free from style errors
+
+1. Install stickler-ci https://github.com/apps/stickler-ci
+2. Enable stickler in your repo. You can do it [here](https://stickler-ci.com/).
+3. In first commit of your feature branch add a copy of [.stickler.yml](./.stickler.yml) and [.eslintrc.json](./.eslintrc.json)  to the root directory.
+   - **Remember** to use both files linked above
+   - **Remember** that `.stickler.yml` file name starts with a dot.
+4. **Do not make any changes in config files - they represent style guidelines that you share with your tem - which is a group of all Microverse students.**
+    - If you think that change is necessary - open a [Pull Request in this repository](../README.md#contributing) and let your code reviewer know about it.
+5. When you open your first pull request you should see Stickler's report at `Checks` tab.
+
+#### Set-up ESlint in your local env - it will help you to find style errors
+
+Go project folder using WSL environment and initiate NPM with following command
+
+```sh
+$ npm init
+This utility will walk you through creating a package.json file.
+It only covers the most common items, and tries to guess sensible defaults.
+
+See `npm help json` for definitive documentation on these fields
+and exactly what they do.
+
+Use `npm install <pkg>` afterwards to install a package and
+save it as a dependency in the package.json file.
+
+Press ^C at any time to quit.
+package name: (redux-bookstore)
+version: (1.0.0)
+description: 
+entry point: (webpack.config.js) src/index.js
+test command:
+git repository: 
+keywords:
+author: Gerald Goh
+license: (ISC)
+About to write to /package.json:
+
+{
+  "name": "",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geraldgsh/redux-bookstore.git"
+  },
+  "author": "Gerald Goh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/geraldgsh/redux-bookstore/issues"
+  },
+  "homepage": "https://github.com/geraldgsh/redux-bookstorer#readme"
+}
 ```
-$ rails g controller Homepage index
-      create  app/controllers/homepage_controller.rb
-       route  get 'homepage/index'
-      invoke  erb
-      create    app/views/homepage
-      create    app/views/homepage/index.html.erb
-      invoke  helper
-      create    app/helpers/homepage_helper.rb
-      invoke  assets
-      invoke    scss
-      create      app/assets/stylesheets/homepage.scss
-```
+
+Command above will generate a "package.json" file for ESlint work off from.
+
+Install ESlint with following command
+
+1. Run `npm install eslint eslint-config-airbnb --save-dev` (not sure how to use npm? Read [this](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)).
+
+2. Run `npx eslint --init`.
+
+3. Make sure you select the following options when prompted.
+
+    `? How would you like to use ESLint?` To check syntax, find problems, and enforce code style
+
+    `? What type of modules does your project use?` JavaScript modules (import/export)
+
+    `? Which framework does your project use?`  React
+
+    `? Does your project use Typescript`  No
+
+    `? Where does your code run?`     Browser
+
+    `? How would you like to define a style for your project?` Use a popular style guide
+
+    `? Which style guide do you want to follow?`      Airbnb
+
+    `? What format do you want your config file to be in?`       JSON
+
+    `The config that you've selected requires the following dependencies: ? Would you like to install them now with npm?`       Yes
+
+4. Copy the contents of [.eslintrc.json](./.eslintrc.json) to the newly generated `.eslintrc.json` overwritting the previous content.
+
+5. **Do not make any changes in config files - they represent style guidelines that you share with your tem - which is a group of all Microverse students.**
+    - If you think that change is necessary - open a [Pull Request in this repository](../README.md#contributing) and let your code reviewer know about it.
+
+6. Double check your `./src` folder for any extra unnecesary `.eslint` config files that might have been generated as this might cause an issue with stickler when you create your Pull Request later on.
+
+7. Run `npx eslint .`.
+
+8. Fix linter errors.
+
+9. **IMPORTANT NOTE**: feel free to research [auto-correct options for ESlint](https://eslint.org/docs/user-guide/command-line-interface#fixing-problems) if you get a flood of errors but keep in mind that correcting style errors manually will help you to make a habit of writing a clean code!
+
+### Set-up Rubocop in your local env - it will help you to find style errors
+
+1. Add `gem 'rubocop'` to `Gemfile` (not sure how to use Gemfile? Read [this](https://bundler.io/v1.15/guides/bundler_setup.html)).
+2. Run `bundle install`.
+3. Copy [.rubocop.yml](./.rubocop.yml) to the root directory of your project
+4. **Do not make any changes in config files - they represent style guidelines that you share with your team - which is a group of all Microverse students.**
+    - If you think that change is necessary - open a [Pull Request in this repository](../README.md#contributing) and let your code reviewer know about it.
+5. Run `rubocop`.
+6. Fix linter errors.
+7. **IMPORTANT NOTE**: feel free to research [auto-correct options for Rubocop](https://rubocop.readthedocs.io/en/latest/auto_correct/) if you get a flood of errors but keep in mind that correcting style errors manually will help you to make a habit of writing a clean code!
+
+## Troubleshooting
+
+1. All config files are in my repo but Stickler does not work.
+
+   - Make sure that Stickler app has permission to access your repository. Find Stickler here https://github.com/settings/installations and check its configuration.
+
+   ![screenshot](https://github.com/microverseinc/linters-config/blob/master/assets/images/stickler_app_config.png)
+
+   - Try to add a new commit to your Pull Request. Stickler should detect changes in your repo and start checking your code.
+
+2. `while scanning for the next token found character '\t' that cannot start any token` error.
+   - Please make sure that you used spaces not tabs for indentation.
+
+3. Check if someone else has had similar problem before [here](https://questions.microverse.org/c/linters-stickler).
+   Please make sure that you used spaces not tabs for indentation.
+
+4. Stickler does not work and nothing helps 💥 - run eslint in your local env and correct all errors. **Remember to let your Code Reviewer know that you had problems with Stickler and you used linter in local env.**
+
+### Future Features
+
+1. 
+2. 
+
+### To begin
+
+1. Clone Repo
+2. 'npm install' to install dependencies
+3. `rails s`
+4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+### Wiki
+
+Checkout our [wikipage](https://github.com/geraldgsh/react-rails-recipebook/wiki) for more details. 
+
+#### Live Demo
+[Demo]()
 
 
+#### Prerequisites
+Web browser like Chrome, Mozilla or similar.
+
+### Original Project Source
+
+[Link](https://github.com/microverseinc/project-redux-bookstore)
+
+### Github Repo
+https://github.com/geraldgsh/redux-bookstore
+
+👤 **Author**
+
+Github: [geraldgsh](https://github.com/geraldgsh)
+
+Twitter: [geraldgsh](https://twitter.com/geraldgsh)
+
+Linkedin: [Gerald Goh](https://www.linkedin.com/geraldgsh)
+
+
+## 🤝 Contributing
+Contributions, issues and feature requests are welcome!
+
+Feel free to check the [issues page](https://github.com/geraldgsh/react-rails-recipebook/issues).
+
+## Show your support
+
+Give a ⭐️ if you like this project!
+
+## Acknowledgments
+
+- Hat tip to anyone whose code was used
+- Inspiration
+- etc
+
+## 📝 License
+
+This project is [MIT](lic.url) licensed.
