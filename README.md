@@ -204,18 +204,21 @@ Install ESlint with following command
 Checkout our [wikipage](https://github.com/geraldgsh/react-rails-recipebook/wiki) for more details. 
 
 #### Live Demo
+
 [Demo]()
 
 
 #### Prerequisites
+
 Web browser like Chrome, Mozilla or similar.
 
 ### Original Project Source
 
-[Link](https://github.com/microverseinc/project-redux-bookstore)
+[Link](https://github.com/geraldgsh/react-rails-recipebook)
 
 ### Github Repo
-https://github.com/geraldgsh/redux-bookstore
+
+[Link](https://github.com/geraldgsh/react-rails-recipebook)
 
 👤 **Author**
 
